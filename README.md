@@ -6,6 +6,7 @@ I have wanted to learn using Rust in server purposes for a long time, I thought 
 My roadmap will be like:
 - (1) Initial Project ([>done](https://github.com/aliereno/rust-simple-blog-api/tree/2d48a693a5fcb0bd1cecafbb410018ee2771deff))
 - (2) Blog List Endpoint (data served statically)([>done](https://github.com/aliereno/rust-simple-blog-api/tree/79e18cc601dffa7d22cd827885c319659fd31982))
+- *(2.1 UPDATE) Change Rocket to Actix*
 - (3) Database integration
 - (3.1) Dockerizing with DB integration
 - (4) CRUD endpoints for Blogs

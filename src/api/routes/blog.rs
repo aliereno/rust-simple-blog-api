@@ -1,30 +1,55 @@
 
+use actix_web::{get, post, put, delete, web, Responder, Result};
+use serde::Serialize;
 
-use rocket::http::Status;
-use rocket::serde::json::{json, Json, Value};
-use crate::utils::response::ApiResponse;
+#[derive(Serialize)]
+struct MessageOut {
+    message: String,
+}
+#[derive(Serialize)]
+struct BlogOut {
+    id: u32,
+    title: String,
+}
 
 
 #[get("/blog")]  // TODO: add query filter params
-pub async fn blog_list() -> Value {
-    json!({ "id": 0, "title": "Hello World!", "content": "Best Blog content." })
+pub async fn blog_list() -> Result<impl Responder> {
+    let response = [BlogOut {
+        id: 1,
+        title: format!("title for blog 1"),
+    }, BlogOut {
+        id: 2,
+        title: format!("title for blog 2"),
+    }];
+    Ok(web::Json(response))
 }
 #[post("/blog")]
-pub async fn blog_create() -> ApiResponse<Value> {
-    ApiResponse {
-        json: Json(json!({ "status": format!("successfully created") })),
-        status: Status::Created,
-    }
+pub async fn blog_create() -> Result<impl Responder> {
+    let response = MessageOut {
+        message: "successfully created".to_string(),
+    };
+    Ok(web::Json(response))
 }
-#[get("/blog/<id>")]
-pub async fn blog_detail(id: u8) -> Value {
-    json!({ "blog": format!("blog #{id}") })
+#[get("/blog/{id}")]
+pub async fn blog_detail(_id: web::Path<u32>) -> Result<impl Responder> {
+    let response = BlogOut {
+        id: *_id,
+        title: format!("title for blog #{_id}"),
+    };
+    Ok(web::Json(response))
 }
-#[put("/blog/<id>")]
-pub async fn blog_update(id: u8) -> Value {
-    json!({ "status": format!("blog #{id}! successfully updated") })
+#[put("/blog/{id}")]
+pub async fn blog_update(_id: web::Path<u32>) -> Result<impl Responder> {
+    let response = MessageOut {
+        message: format!("blog #{_id} successfully updated"),
+    };
+    Ok(web::Json(response))
 }
-#[delete("/blog/<id>")]
-pub async fn blog_delete(id: u8) -> Value {
-    json!({ "status": format!("blog #{id}! successfully deleted") })
+#[delete("/blog/{id}")]
+pub async fn blog_delete(_id: web::Path<u32>) -> Result<impl Responder> {
+    let response = MessageOut {
+        message: format!("blog #{_id} successfully deleted"),
+    };
+    Ok(web::Json(response))
 }

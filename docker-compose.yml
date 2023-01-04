@@ -3,19 +3,19 @@ services:
     db:
         image: 'postgres:15-alpine'
         env_file:
-            - ../.env
+            - .env
         ports:
             - '5430:5432'
     app:
         build:
-            context: ./..
+            context: .
             dockerfile: Dockerfile
         env_file:
-            - ../.env
+            - .env
         environment:
             - CARGO_TARGET_DIR=/target
         volumes:
-            - './../:/usr/src/app'
+            - '.:/usr/src/app'
         depends_on:
             - db
         command: 'bash -c "cargo watch -x run"'

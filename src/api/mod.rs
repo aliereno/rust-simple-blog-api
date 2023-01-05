@@ -1,5 +1,6 @@
 use actix_web::web;
 pub mod routes;
+pub mod serializers;
 
 pub fn config_app(cfg: &mut web::ServiceConfig) {
     // domain includes: /products/{product_id}/parts/{part_id}

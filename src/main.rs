@@ -9,6 +9,7 @@ use diesel::{
 mod api;
 mod db;
 mod models;
+mod service;
 
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
@@ -19,13 +20,13 @@ async fn main() -> std::io::Result<()> {
 
     // create db connection pool
     let manager = ConnectionManager::<PgConnection>::new(database_url);
-    let pool: db::Pool = r2d2::Pool::builder()
+    let db_pool: db::DBPool = r2d2::Pool::builder()
         .build(manager)
         .expect("Failed to create pool.");
 
     HttpServer::new(move || {
         App::new()
-            .app_data(web::Data::new(pool.clone()))
+            .app_data(web::Data::new(db_pool.clone()))
             .configure(api::config_app)
             .wrap(Logger::default())
     })

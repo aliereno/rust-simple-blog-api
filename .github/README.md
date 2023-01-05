@@ -9,11 +9,12 @@ My roadmap will be like:
 - *(2.1 UPDATE) Change Rocket to Actix*([>done](https://github.com/aliereno/rust-simple-blog-api/commit/b965874d5f1005878c90d050867bb59a58c69026))
 - (3) Database integration([>done](https://github.com/aliereno/rust-simple-blog-api/tree/93cf2dcf305a9f22c5ce8c28f7ab27ed51e739f9))
 - (3.1) Dockerizing with DB integration([>done](https://github.com/aliereno/rust-simple-blog-api/tree/93cf2dcf305a9f22c5ce8c28f7ab27ed51e739f9))
-- (4) Create Blog model and implement migration([>done](https://github.com/aliereno/rust-simple-blog-api/commits/main))
-- (5) Refactoring CRUD endpoints for database connection
-- (6) Auth endpoints | JWT Authentication
-- (7) OpenAPI(Swagger) integration
-- (8) Logging
+- (4) Create Blog model and implement migration([>done](https://github.com/aliereno/rust-simple-blog-api/tree/4ec8cebf347aa46296b72522a080babd57a3b974))
+- (5) Refactoring CRUD endpoints for database connection([>done](https://github.com/aliereno/rust-simple-blog-api/commits/main))
+- (6) Write tests for CRUD endpoints
+- (7) Auth endpoints | JWT Authentication
+- (8) OpenAPI(Swagger) integration
+- (9) Logging
 
 
 ## Running

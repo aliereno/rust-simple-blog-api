@@ -8,7 +8,7 @@ pub fn get_all_blogs(conn: &mut PgConnection)-> Result<Vec<Blog>, DbError> {
     use crate::db::schema::blogs::dsl::*;
 
     let items = blogs
-        // .filter(published.eq(true))
+        .filter(published.eq(true))
         .load::<Blog>(conn)?;
 
     Ok(items)
@@ -18,6 +18,7 @@ pub fn get_blog_by_id(conn: &mut PgConnection, _id: i32)-> Result<Option<Blog>, 
     use crate::db::schema::blogs::dsl::*;
 
     let item = blogs
+        .filter(published.eq(true))
         .find(_id)
         .first(conn)
         .optional()?;

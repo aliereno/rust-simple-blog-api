@@ -6,7 +6,16 @@ use crate::api::serializers::{MessageOut, BlogIn};
 use crate::service::blog_service;
 
 
-#[get("/blog")]  // TODO: add query filter params
+pub fn config_blog(cfg: &mut web::ServiceConfig) {
+    cfg
+    .service(blog_detail)
+    .service(blog_update)
+    .service(blog_delete)
+    .service(blog_create)
+    .service(blog_list);
+}
+
+#[get("/")]  // TODO: add query filter params
 pub async fn blog_list(db_pool: web::Data<DBPool>) -> Result<HttpResponse, Error> {
 
     let response = web::block(move || {
@@ -20,7 +29,7 @@ pub async fn blog_list(db_pool: web::Data<DBPool>) -> Result<HttpResponse, Error
     Ok(HttpResponse::Ok().json(response))
 }
 
-#[post("/blog")]
+#[post("/")]
 pub async fn blog_create(new_blog: web::Json<BlogIn>, db_pool: web::Data<DBPool>) -> Result<impl Responder> {
 
     web::block(move || {
@@ -37,7 +46,7 @@ pub async fn blog_create(new_blog: web::Json<BlogIn>, db_pool: web::Data<DBPool>
     Ok(web::Json(response))
 }
 
-#[get("/blog/{id}")]
+#[get("/{id}")]
 pub async fn blog_detail(_id: web::Path<i32>, db_pool: web::Data<DBPool>) -> Result<HttpResponse, Error> {
 
     let response = web::block(move || {
@@ -57,7 +66,7 @@ pub async fn blog_detail(_id: web::Path<i32>, db_pool: web::Data<DBPool>) -> Res
     Ok(HttpResponse::Ok().json(response))
 }
 
-#[put("/blog/{id}")]
+#[put("/{id}")]
 pub async fn blog_update(_id: web::Path<i32>, update_blog: web::Json<BlogIn>, db_pool: web::Data<DBPool>) -> Result<HttpResponse, Error> {
 
     web::block(move || {
@@ -75,7 +84,7 @@ pub async fn blog_update(_id: web::Path<i32>, update_blog: web::Json<BlogIn>, db
     Ok(HttpResponse::Ok().json(response))
 }
 
-#[delete("/blog/{id}")]
+#[delete("/{id}")]
 pub async fn blog_delete(_id: web::Path<i32>, db_pool: web::Data<DBPool>) -> Result<HttpResponse, Error> {
     web::block(move || {
         let mut conn = db_pool.get()?;

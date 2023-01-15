@@ -17,3 +17,5 @@ migrate:
 	docker-compose exec app bash -c "diesel migration run"
 migrate-redo:
 	docker-compose exec app bash -c "diesel migration redo"
+test:
+	docker-compose exec app bash -c "cargo test -- --nocapture"

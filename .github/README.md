@@ -10,8 +10,8 @@ My roadmap will be like:
 - (3) Database integration([>done](https://github.com/aliereno/rust-simple-blog-api/tree/93cf2dcf305a9f22c5ce8c28f7ab27ed51e739f9))
 - (3.1) Dockerizing with DB integration([>done](https://github.com/aliereno/rust-simple-blog-api/tree/93cf2dcf305a9f22c5ce8c28f7ab27ed51e739f9))
 - (4) Create Blog model and implement migration([>done](https://github.com/aliereno/rust-simple-blog-api/tree/4ec8cebf347aa46296b72522a080babd57a3b974))
-- (5) Refactoring CRUD endpoints for database connection([>done](https://github.com/aliereno/rust-simple-blog-api/commits/main))
-- (6) Write tests for CRUD endpoints
+- (5) Refactoring CRUD endpoints for database connection([>done](https://github.com/aliereno/rust-simple-blog-api/tree/6a22b548a037e6c30ab08604755491551af9aa0c))
+- (6) Write tests for CRUD endpoints([>done, but i will improve](https://github.com/aliereno/rust-simple-blog-api/tree/d68b99069c4ae570c2963e686122582c065368e6))
 - (7) Auth endpoints | JWT Authentication
 - (8) OpenAPI(Swagger) integration
 - (9) Logging

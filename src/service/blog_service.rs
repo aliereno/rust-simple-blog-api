@@ -1,55 +1,53 @@
-
+use crate::db::schema::blogs::dsl::*;
+use crate::models::blog::Blog;
+use crate::utils::error::ApiError;
 use diesel::prelude::*;
-use crate::{models::blog::Blog};
 
-pub type DbError = Box<dyn std::error::Error + Send + Sync>;
+pub struct BlogService {}
 
-pub fn get_all_blogs(conn: &mut PgConnection)-> Result<Vec<Blog>, DbError> {
-    use crate::db::schema::blogs::dsl::*;
+impl BlogService {
+    pub async fn get_all_blogs(conn: &mut PgConnection) -> Result<Vec<Blog>, ApiError> {
+        let items = blogs.filter(published.eq(true)).load::<Blog>(conn)?;
 
-    let items = blogs
-        .filter(published.eq(true))
-        .load::<Blog>(conn)?;
+        Ok(items)
+    }
 
-    Ok(items)
-}
+    pub async fn get_blog_by_id(conn: &mut PgConnection, _id: i32) -> Result<Blog, ApiError> {
+        let item = blogs.filter(published.eq(true)).find(_id).first(conn)?;
 
-pub fn get_blog_by_id(conn: &mut PgConnection, _id: i32)-> Result<Option<Blog>, DbError> {
-    use crate::db::schema::blogs::dsl::*;
+        Ok(item)
+    }
 
-    let item = blogs
-        .filter(published.eq(true))
-        .find(_id)
-        .first(conn)
-        .optional()?;
+    pub async fn create_blog(
+        conn: &mut PgConnection,
+        _title: &str,
+        _body: &str,
+        _published: &bool,
+    ) -> Result<(), ApiError> {
+        diesel::insert_into(blogs)
+            .values((title.eq(_title), body.eq(_body), published.eq(_published)))
+            .execute(conn)?;
 
-    Ok(item)
-}
+        Ok(())
+    }
 
-pub fn create_blog(conn: &mut PgConnection, _title: &str, _body: &str, _published: &bool) -> Result<(), DbError> {
-    use crate::db::schema::blogs::dsl::*;
+    pub async fn update_blog(
+        conn: &mut PgConnection,
+        _id: i32,
+        _title: &str,
+        _body: &str,
+        _published: &bool,
+    ) -> Result<Option<Blog>, ApiError> {
+        let blog = diesel::update(blogs.find(_id))
+            .set((title.eq(_title), body.eq(_body), published.eq(_published)))
+            .get_result::<Blog>(conn)?;
 
-    diesel::insert_into(blogs).values((title.eq(_title), body.eq(_body), published.eq(_published))).execute(conn)?;
+        Ok(Some(blog))
+    }
 
-    Ok(())
-}
+    pub async fn delete_blog(conn: &mut PgConnection, _id: i32) -> Result<(), ApiError> {
+        diesel::delete(blogs.filter(id.eq(_id))).execute(conn)?;
 
-pub fn update_blog(conn: &mut PgConnection, _id: i32, _title: &str, _body: &str, _published: &bool) -> Result<Option<Blog>, DbError> {
-    use crate::db::schema::blogs::dsl::*;
-
-    let blog = diesel::update(blogs.find(_id))
-        .set((title.eq(_title), body.eq(_body), published.eq(_published)))
-        .get_result::<Blog>(conn)?;
-    
-    Ok(Some(blog))
-}
-
-pub fn delete_blog(conn: &mut PgConnection, _id: i32)-> Result<(), DbError> {
-    use crate::db::schema::blogs::dsl::*;
-
-    diesel::delete(blogs.filter(id.eq(_id)))
-        .execute(conn)
-        .expect("Error deleting posts");
-
-    Ok(())
+        Ok(())
+    }
 }

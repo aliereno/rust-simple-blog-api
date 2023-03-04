@@ -1,6 +1,4 @@
-
-
-use diesel::{sql_query, Connection, PgConnection, RunQueryDsl, r2d2::ConnectionManager, r2d2::Pool};
+use diesel::{r2d2::ConnectionManager, r2d2::Pool, sql_query, Connection, PgConnection, RunQueryDsl};
 use std::sync::atomic::AtomicU32;
 use url::Url;
 
@@ -30,10 +28,10 @@ impl TestDb {
         sql_query(format!("CREATE DATABASE {};", name))
             .execute(&mut conn)
             .unwrap();
-            
+
         let mut url = Url::parse(&default_db_url).unwrap();
         url.set_path(&name);
-        
+
         let mut conn = PgConnection::establish(&url.to_string()).unwrap();
         run_migration(&mut conn);
 
@@ -45,21 +43,11 @@ impl TestDb {
         }
     }
 
-    pub fn url(&self) -> &str {
-        &self.url
-    }
-
     pub fn conn(&self) -> DBPool {
         let manager = ConnectionManager::<PgConnection>::new(&self.url);
-        let db_pool: DBPool = Pool::builder()
-        .build(manager)
-        .expect("Failed to create pool.");
+        let db_pool: DBPool = Pool::builder().build(manager).expect("Failed to create pool.");
 
         return db_pool;
-    }
-
-    pub fn leak(&mut self) {
-        self.delete_on_drop = false;
     }
 }
 impl Drop for TestDb {
@@ -76,7 +64,7 @@ impl Drop for TestDb {
         ))
         .execute(&mut conn)
         .unwrap();
-        
+
         sql_query(format!("DROP DATABASE {}", self.name))
             .execute(&mut conn)
             .unwrap();

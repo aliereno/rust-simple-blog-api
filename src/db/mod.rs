@@ -1,4 +1,7 @@
-use diesel::{PgConnection, r2d2::{self, ConnectionManager}};
+use diesel::{
+    r2d2::{self, ConnectionManager},
+    PgConnection,
+};
 use diesel_migrations::{embed_migrations, EmbeddedMigrations, MigrationHarness};
 
 pub mod schema;

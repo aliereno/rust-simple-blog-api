@@ -1,6 +1,6 @@
+use crate::db::schema::blogs;
 use diesel::prelude::*;
 use serde::{Deserialize, Serialize};
-use crate::db::schema::blogs;
 
 #[derive(Debug, Serialize, Deserialize, Queryable, Insertable)]
 #[diesel(table_name = blogs)]

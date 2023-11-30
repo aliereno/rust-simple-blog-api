@@ -27,6 +27,7 @@ impl fmt::Display for ApiError {
 
 impl From<DieselError> for ApiError {
     fn from(error: DieselError) -> Self {
+        // TODO: log error
         match error {
             DieselError::NotFound => ApiError::new("Record not found", 404),
             _ => ApiError::new("Internal server error", 500),

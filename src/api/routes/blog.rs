@@ -24,7 +24,7 @@ pub async fn blog_list(db_pool: web::Data<DBPool>) -> Result<HttpResponse, ApiEr
 #[post("/")]
 pub async fn blog_create(new_blog: web::Json<BlogIn>, db_pool: web::Data<DBPool>) -> Result<HttpResponse, ApiError> {
     let mut conn = get_conn(db_pool).await?;
-    let blog = BlogService::create_blog(&mut conn, &new_blog.title, &new_blog.body, &new_blog.published).await?;
+    BlogService::create_blog(&mut conn, &new_blog.title, &new_blog.body, &new_blog.published).await?;
     let response = MessageOut {
         message: "successfully created".to_string(),
     };
@@ -34,7 +34,7 @@ pub async fn blog_create(new_blog: web::Json<BlogIn>, db_pool: web::Data<DBPool>
 #[get("/{id}")]
 pub async fn blog_detail(_id: web::Path<i32>, db_pool: web::Data<DBPool>) -> Result<HttpResponse, ApiError> {
     let mut conn = get_conn(db_pool).await?;
-    let blog = BlogService::get_blog_by_id(&mut conn, _id.into_inner()).await?;
+    let blog = BlogService::get_blog_by_id(&mut conn, *_id).await?;
     Ok(HttpResponse::Ok().json(blog))
 }
 
@@ -45,9 +45,10 @@ pub async fn blog_update(
     db_pool: web::Data<DBPool>,
 ) -> Result<HttpResponse, ApiError> {
     let mut conn = get_conn(db_pool).await?;
+    BlogService::get_blog_by_id(&mut conn, *_id).await?;
     BlogService::update_blog(
         &mut conn,
-        _id.into_inner(),
+        *_id,
         &update_blog.title,
         &update_blog.body,
         &update_blog.published,
@@ -55,7 +56,7 @@ pub async fn blog_update(
     .await?;
 
     let response = MessageOut {
-        message: format!("successfully updated"),
+        message: "successfully updated".to_string(),
     };
     Ok(HttpResponse::Ok().json(response))
 }
@@ -63,9 +64,10 @@ pub async fn blog_update(
 #[delete("/{id}")]
 pub async fn blog_delete(_id: web::Path<i32>, db_pool: web::Data<DBPool>) -> Result<HttpResponse, ApiError> {
     let mut conn = get_conn(db_pool).await?;
-    BlogService::delete_blog(&mut conn, _id.into_inner()).await?;
+    BlogService::get_blog_by_id(&mut conn, *_id).await?;
+    BlogService::delete_blog(&mut conn, *_id).await?;
     let response = MessageOut {
-        message: format!("successfully deleted"),
+        message: "successfully deleted".to_string(),
     };
     Ok(HttpResponse::Ok().json(response))
 }

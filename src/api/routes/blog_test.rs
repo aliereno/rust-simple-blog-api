@@ -1,21 +1,15 @@
 #[cfg(test)]
 mod tests {
-    use actix_web::{body::to_bytes, http, test, test::TestRequest, web, App};
+    use actix_web::{body::to_bytes, http, test, test::TestRequest};
     use serde_json::json;
 
-    use crate::{api::routes::blog::config_blog, db::test_db::TestDb, models::blog::Blog};
+    use crate::{app::create_app, db::tests::get_test_db, models::blog::Blog};
 
     #[actix_web::test]
     async fn test_blog() {
-        let db = TestDb::new();
-        let db_pool = db.conn();
+        let db_pool = get_test_db();
 
-        let mut app = test::init_service(
-            App::new()
-                .app_data(web::Data::new(db_pool.clone()))
-                .configure(config_blog),
-        )
-        .await;
+        let app = test::init_service(create_app(&db_pool)).await;
 
         let request_body = json!({
             "title": "blog test",
@@ -24,27 +18,43 @@ mod tests {
         });
 
         let response = TestRequest::post()
-            .uri("/")
+            .uri("/api/blog/")
             .set_json(&request_body)
-            .send_request(&mut app)
+            .send_request(&app)
             .await;
-        assert!(response.status().is_success(), "Failed to create blog {:?}", response);
+        assert!(
+            response.status().is_success(),
+            "Failed to create blog {}",
+            response.status()
+        );
 
         let response = TestRequest::post()
-            .uri("/")
+            .uri("/api/blog/")
             .set_json(&request_body)
-            .send_request(&mut app)
+            .send_request(&app)
             .await;
-        assert!(response.status().is_success(), "Failed to create blog {:?}", response);
+        assert!(
+            response.status().is_success(),
+            "Failed to create blog {}",
+            response.status()
+        );
 
-        let response = TestRequest::get().uri("/1").send_request(&mut app).await;
-        assert!(response.status().is_success(), "Failed to find blog detail");
+        let response = TestRequest::get().uri("/api/blog/1").send_request(&app).await;
+        assert!(
+            response.status().is_success(),
+            "Failed to find blog detail {}",
+            response.status()
+        );
         let blog: Blog = test::read_body_json(response).await;
         assert_eq!(blog.title, "blog test", "Found wrong blog {:?}", blog);
         assert_eq!(blog.body, "body test", "Found wrong blog {:?}", blog);
 
-        let response = TestRequest::get().uri("/").send_request(&mut app).await;
-        assert!(response.status().is_success(), "Failed to fetch list of blogs");
+        let response = TestRequest::get().uri("/api/blog/").send_request(&app).await;
+        assert!(
+            response.status().is_success(),
+            "Failed to fetch list of blogs {}",
+            response.status()
+        );
         let list_of_blogs: Vec<Blog> = test::read_body_json(response).await;
         assert_eq!(
             list_of_blogs.len(),
@@ -60,22 +70,22 @@ mod tests {
         });
 
         let response = TestRequest::put()
-            .uri("/1")
+            .uri("/api/blog/1")
             .set_json(&request_body)
-            .send_request(&mut app)
+            .send_request(&app)
             .await;
-        assert!(response.status().is_success(), "Failed to update blog {:?}", response);
+        assert!(response.status().is_success(), "Failed to update blog");
 
-        let response = TestRequest::get().uri("/1").send_request(&mut app).await;
+        let response = TestRequest::get().uri("/api/blog/1").send_request(&app).await;
         assert!(response.status().is_success(), "Failed to find blog detail");
         let blog: Blog = test::read_body_json(response).await;
         assert_eq!(blog.title, "blog test update", "Found wrong blog {:?}", blog);
         assert_eq!(blog.body, "body test update", "Found wrong blog {:?}", blog);
 
-        let response = TestRequest::delete().uri("/1").send_request(&mut app).await;
+        let response = TestRequest::delete().uri("/api/blog/1").send_request(&app).await;
         assert!(response.status().is_success(), "Failed to find blog detail");
 
-        let response = TestRequest::get().uri("/").send_request(&mut app).await;
+        let response = TestRequest::get().uri("/api/blog/").send_request(&app).await;
         assert!(response.status().is_success(), "Failed to fetch list of blogs");
         let list_of_blogs: Vec<Blog> = test::read_body_json(response).await;
         assert_eq!(
@@ -91,26 +101,26 @@ mod tests {
             "published": false
         });
         let response = TestRequest::post()
-            .uri("/")
+            .uri("/api/blog/")
             .set_json(&request_body)
-            .send_request(&mut app)
+            .send_request(&app)
             .await;
-        assert!(response.status().is_success(), "Failed to create blog {:?}", response);
+        assert!(response.status().is_success(), "Failed to create blog");
 
-        let response = TestRequest::get().uri("/3").send_request(&mut app).await;
+        let response = TestRequest::get().uri("/api/blog/3").send_request(&app).await;
         assert_eq!(
             response.status(),
             http::StatusCode::NOT_FOUND,
             "Expected 404 for getting published:false Blog"
         );
-        let response_body = to_bytes(response.into_body()).await.unwrap();
+        let response_body = to_bytes(response.into_body()).await.unwrap_or_default();
         assert_eq!(
             response_body,
             b"{\"message\":\"Record not found\"}"[..],
             "Expected valid message for not found Blog request"
         );
 
-        let response = TestRequest::get().uri("/").send_request(&mut app).await;
+        let response = TestRequest::get().uri("/api/blog/").send_request(&app).await;
         assert!(response.status().is_success(), "Failed to fetch list of blogs");
         let list_of_blogs: Vec<Blog> = test::read_body_json(response).await;
         assert_eq!(
@@ -123,36 +133,30 @@ mod tests {
 
     #[actix_web::test]
     async fn test_blog_not_found() {
-        let db = TestDb::new();
-        let db_pool = db.conn();
+        let db_pool = get_test_db();
 
-        let mut app = test::init_service(
-            App::new()
-                .app_data(web::Data::new(db_pool.clone()))
-                .configure(config_blog),
-        )
-        .await;
+        let app = test::init_service(create_app(&db_pool)).await;
 
-        let response = TestRequest::get().uri("/0").send_request(&mut app).await;
+        let response = TestRequest::get().uri("/api/blog/0").send_request(&app).await;
         assert_eq!(
             response.status(),
             http::StatusCode::NOT_FOUND,
             "Expected 404 for getting Blog that not exist"
         );
-        let response_body = to_bytes(response.into_body()).await.unwrap();
+        let response_body = to_bytes(response.into_body()).await.unwrap_or_default();
         assert_eq!(
             response_body,
             b"{\"message\":\"Record not found\"}"[..],
             "Expected valid message for not found Blog request"
         );
 
-        let response = TestRequest::delete().uri("/0").send_request(&mut app).await;
+        let response = TestRequest::delete().uri("/api/blog/0").send_request(&app).await;
         assert_eq!(
             response.status(),
             http::StatusCode::NOT_FOUND,
             "Expected 404 for deleting Blog that not exist"
         );
-        let response_body = to_bytes(response.into_body()).await.unwrap();
+        let response_body = to_bytes(response.into_body()).await.unwrap_or_default();
         assert_eq!(
             response_body,
             b"{\"message\":\"Record not found\"}"[..],
@@ -164,21 +168,18 @@ mod tests {
             "body": "body test",
             "published": true
         });
-        let request_body_with_missing_fields = json!({
-            "title": "blog test update",
-        });
 
         let response = TestRequest::put()
-            .uri("/0")
+            .uri("/api/blog/0")
             .set_json(&request_body)
-            .send_request(&mut app)
+            .send_request(&app)
             .await;
         assert_eq!(
             response.status(),
             http::StatusCode::NOT_FOUND,
             "Expected 404 for updating Blog that not exist"
         );
-        let response_body = to_bytes(response.into_body()).await.unwrap();
+        let response_body = to_bytes(response.into_body()).await.unwrap_or_default();
         assert_eq!(
             response_body,
             b"{\"message\":\"Record not found\"}"[..],
@@ -186,16 +187,16 @@ mod tests {
         );
 
         let response = TestRequest::put()
-            .uri("/0")
-            .set_json(&request_body_with_missing_fields)
-            .send_request(&mut app)
+            .uri("/api/blog/0")
+            .set_json(&request_body)
+            .send_request(&app)
             .await;
         assert_eq!(
             response.status(),
             http::StatusCode::NOT_FOUND,
             "Expected 404 for updating Blog that not exist"
         );
-        let response_body = to_bytes(response.into_body()).await.unwrap();
+        let response_body = to_bytes(response.into_body()).await.unwrap_or_default();
         assert_eq!(
             response_body,
             b"{\"message\":\"Record not found\"}"[..],
@@ -205,17 +206,11 @@ mod tests {
 
     #[actix_web::test]
     async fn test_invalid_request_params() {
-        let db = TestDb::new();
-        let db_pool = db.conn();
+        let db_pool = get_test_db();
 
-        let mut app = test::init_service(
-            App::new()
-                .app_data(web::Data::new(db_pool.clone()))
-                .configure(config_blog),
-        )
-        .await;
+        let app = test::init_service(create_app(&db_pool)).await;
 
-        let response = TestRequest::post().uri("/").send_request(&mut app).await;
+        let response = TestRequest::post().uri("/api/blog/").send_request(&app).await;
         assert_eq!(
             response.status(),
             http::StatusCode::UNPROCESSABLE_ENTITY,
@@ -225,7 +220,7 @@ mod tests {
         //let response_body = to_bytes(response.into_body()).await.unwrap();
         //assert_eq!(response_body, "{\"message\": \"\"}", "Expected ..");
 
-        let response = TestRequest::put().uri("/0").send_request(&mut app).await;
+        let response = TestRequest::put().uri("/api/blog/0").send_request(&app).await;
         assert_eq!(
             response.status(),
             http::StatusCode::UNPROCESSABLE_ENTITY,

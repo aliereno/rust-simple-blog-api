@@ -5,6 +5,11 @@ pub struct MessageOut {
     pub message: String,
 }
 
+#[derive(Serialize)]
+pub struct HealthCheckOut {
+    pub status: String,
+}
+
 #[derive(Serialize, Deserialize)]
 pub struct BlogIn {
     pub title: String,

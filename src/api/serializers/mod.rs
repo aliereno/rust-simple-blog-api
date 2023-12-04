@@ -16,3 +16,21 @@ pub struct BlogIn {
     pub body: String,
     pub published: bool,
 }
+
+#[derive(Serialize, Deserialize)]
+pub struct RegisterIn {
+    pub username: String,
+    pub email: String,
+    pub password: String,
+}
+
+#[derive(Serialize, Deserialize)]
+pub struct LoginIn {
+    pub username: String,
+    pub password: String,
+}
+
+#[derive(Serialize)]
+pub struct LoginOut {
+    pub access_token: String,
+}

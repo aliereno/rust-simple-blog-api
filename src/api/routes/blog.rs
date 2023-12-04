@@ -2,7 +2,7 @@ use actix_web::{delete, get, post, put, web, HttpResponse, Result};
 
 use crate::api::serializers::{BlogIn, MessageOut};
 use crate::db::DBPool;
-use crate::service::blog_service::BlogService;
+use crate::service::blog_service;
 use crate::utils::connection::get_conn;
 use crate::utils::error::ApiError;
 
@@ -17,14 +17,14 @@ pub fn config_blog(cfg: &mut web::ServiceConfig) {
 #[get("/")] // TODO: add query filter params
 pub async fn blog_list(db_pool: web::Data<DBPool>) -> Result<HttpResponse, ApiError> {
     let mut conn = get_conn(db_pool).await?;
-    let blogs = BlogService::get_all_blogs(&mut conn).await?;
+    let blogs = blog_service::get_all_blogs(&mut conn).await?;
     Ok(HttpResponse::Ok().json(blogs))
 }
 
 #[post("/")]
 pub async fn blog_create(new_blog: web::Json<BlogIn>, db_pool: web::Data<DBPool>) -> Result<HttpResponse, ApiError> {
     let mut conn = get_conn(db_pool).await?;
-    BlogService::create_blog(&mut conn, &new_blog.title, &new_blog.body, &new_blog.published).await?;
+    blog_service::create_blog(&mut conn, &new_blog.title, &new_blog.body, &new_blog.published).await?;
     let response = MessageOut {
         message: "successfully created".to_string(),
     };
@@ -34,7 +34,7 @@ pub async fn blog_create(new_blog: web::Json<BlogIn>, db_pool: web::Data<DBPool>
 #[get("/{id}")]
 pub async fn blog_detail(_id: web::Path<i32>, db_pool: web::Data<DBPool>) -> Result<HttpResponse, ApiError> {
     let mut conn = get_conn(db_pool).await?;
-    let blog = BlogService::get_blog_by_id(&mut conn, *_id).await?;
+    let blog = blog_service::get_blog_by_id(&mut conn, *_id).await?;
     Ok(HttpResponse::Ok().json(blog))
 }
 
@@ -45,8 +45,8 @@ pub async fn blog_update(
     db_pool: web::Data<DBPool>,
 ) -> Result<HttpResponse, ApiError> {
     let mut conn = get_conn(db_pool).await?;
-    BlogService::get_blog_by_id(&mut conn, *_id).await?;
-    BlogService::update_blog(
+    blog_service::get_blog_by_id(&mut conn, *_id).await?;
+    blog_service::update_blog(
         &mut conn,
         *_id,
         &update_blog.title,
@@ -64,8 +64,8 @@ pub async fn blog_update(
 #[delete("/{id}")]
 pub async fn blog_delete(_id: web::Path<i32>, db_pool: web::Data<DBPool>) -> Result<HttpResponse, ApiError> {
     let mut conn = get_conn(db_pool).await?;
-    BlogService::get_blog_by_id(&mut conn, *_id).await?;
-    BlogService::delete_blog(&mut conn, *_id).await?;
+    blog_service::get_blog_by_id(&mut conn, *_id).await?;
+    blog_service::delete_blog(&mut conn, *_id).await?;
     let response = MessageOut {
         message: "successfully deleted".to_string(),
     };
